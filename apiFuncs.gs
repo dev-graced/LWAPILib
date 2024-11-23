@@ -149,7 +149,7 @@ function downloadFile(fileId,env){
 
 function getGroupInfo(env){
   const apiUriPart = "groups";
-  requestApiGet(apiUriPart,env.accessToken)
+  return requestApiGet(apiUriPart,env.accessToken)
 }
 
 function getUserInfo(userId,env){

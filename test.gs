@@ -68,3 +68,30 @@ function test_LWnotify(){
 function test_auth(){
   console.log(getAuthUrl());
 }
+
+function test_getGroupInfo(){
+  const targetGroupName = "よろず相談所（テスト用）";
+
+  const response = getGroupInfo(env);
+
+  //返信結果をパース
+  const groupListJson = response.getContentText();
+  const groupList = JSON.parse(groupListJson)["groups"];
+
+  for(let i=0;i<groupList.length;i++){
+    const groupName = groupList[i]["groupName"];
+
+    if(groupName == targetGroupName){
+      console.log("groupName:",groupName,"groupID:",groupList[i]["groupId"])
+    }
+  }
+}
+
+function showUserAccessToken(){
+  console.log("userAccessToken",getUserAccessToken());
+}
+
+function test_getAtuthUrl(){
+  const authUrl = getAuthUrl();
+  console.log("authUrl",authUrl);
+}
