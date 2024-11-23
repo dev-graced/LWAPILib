@@ -83,16 +83,15 @@ function createGroupNote(groupId, title, content) {
   // LINE WORKS の既存のグループにグループノートを新規投稿する関数
   const accessToken = getUserAccessToken();
   
-  const apiUriPart = "notes/groups/" + groupId + "/notes";
+  const apiUriPart = "groups/" + groupId + "/note/posts";
   
   // APIリクエストのペイロードを作成
   const payload = {
     "title": title,
-    "content": content,
-    "createdBy": {
-      "type": "user",
-      "value": Session.getActiveUser().getEmail()
-    }
+    "body": content,
+    "enableCollaboration": false,
+    "isNotice": false,
+    "sendNotifications": false
   };
   
   // APIリクエストを実行
