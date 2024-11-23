@@ -1,0 +1,5 @@
+{
+    "scriptId": "{プロジェクトのスクリプトID}",
+    "rootDir": "./",
+    "filePushOrder": ["Code.gs", "funcs.gs","findNext.gs","DrDHCalCheck.gs","syncCalender.gs","test.gs","dialog.html"]
+}
