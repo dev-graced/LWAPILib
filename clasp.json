@@ -1,5 +1,5 @@
 {
-    "scriptId": "{プロジェクトのスクリプトID}",
+    "scriptId": "1SEhvSN3z7vd8q0hOkjw95IMUNlQnxbjYL5NeuFmbloLzFqRy7-0bPHIw",
     "rootDir": "./",
-    "filePushOrder": ["Code.gs", "funcs.gs","findNext.gs","DrDHCalCheck.gs","syncCalender.gs","test.gs","dialog.html"]
+    "filePushOrder": ["apiFuncs.gs", "botFuncs.gs","test.gs"]
 }
