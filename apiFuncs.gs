@@ -9,34 +9,18 @@
 // User Account認証用の設定
 const USER_AUTH_CONFIG = {
   CLIENT_ID: "Ypeke8IZkJfaIERDLxA8",
-  REDIRECT_URI: ScriptApp.getService().getUrl(),
+  // REDIRECT_URI: "https://script.google.com/macros/s/AKfycbzGqOAHKBaBe-HzYiryXC-Z2XlJSJK2PgsjUMvu_GrAMBt403xyd1JZ_TWiqSbpwuC5Ng/exec",
   AUTH_URL: "https://auth.worksmobile.com/oauth2/v2.0/authorize",
   TOKEN_URL: "https://auth.worksmobile.com/oauth2/v2.0/token",
   SCOPE: "group.note"
 };
 
-function doGet(e) {
-  // 認可コードを受け取るためのコールバックハンドラ
-  if (e.parameter.code) {
-    // 認可コードを使用してアクセストークンを取得
-    const accessToken = getAccessTokenFromCode(e.parameter.code);
-    PropertiesService.getUserProperties().setProperty('userAccessToken', accessToken);
-    return HtmlService.createHtmlOutput('認証が完了しました。このページを閉じてください。');
-  }
-  
-  // 認証ページにリダイレクト
-  return HtmlService.createHtmlOutput(`
-    <script>
-      window.location.href = "${getAuthUrl()}";
-    </script>
-  `);
-}
-
-function getAuthUrl() {
+function getAuthUrl(redirectUri) {
   // 認証URLを生成
   const params = {
     client_id: USER_AUTH_CONFIG.CLIENT_ID,
-    redirect_uri: USER_AUTH_CONFIG.REDIRECT_URI,
+    // redirect_uri: USER_AUTH_CONFIG.REDIRECT_URI,
+    redirect_uri: redirectUri,
     scope: USER_AUTH_CONFIG.SCOPE,
     response_type: 'code',
     state: Utilities.getUuid()
@@ -70,18 +54,9 @@ function getAccessTokenFromCode(code) {
   return json.access_token;
 }
 
-function getUserAccessToken() {
-  // ユーザーのアクセストークンを取得
-  const token = PropertiesService.getUserProperties().getProperty('userAccessToken');
-  if (!token) {
-    throw new Error('アクセストークンが見つかりません。認証を実行してください。');
-  }
-  return token;
-}
-
-function createGroupNote(groupId, title, content) {
+function createGroupNote(groupId, title, content, accessToken) {
   // LINE WORKS の既存のグループにグループノートを新規投稿する関数
-  const accessToken = getUserAccessToken();
+  // const accessToken = getUserAccessToken();
   
   const apiUriPart = "groups/" + groupId + "/note/posts";
   
