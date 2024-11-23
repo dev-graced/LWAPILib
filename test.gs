@@ -1,6 +1,10 @@
 /** 
  * テストに用いる、LINE WORKS API のアクセストークン周りの処理 
  */
+
+let env = getEnv();
+setLWAPI(env);
+
 function setLWAPI(env){
 // LINE WORKS API の情報を env にセットする関数
 
@@ -26,7 +30,7 @@ function setLWAPI(env){
 
 function testCreateGroupNote() {
   // テスト用のパラメータ
-  const groupId = "146694871"; // 実際のグループID
+  const groupId = "7e1c3a3e-9a16-417d-3f25-05dade92ac87"; // 「よろず相談所（テスト用）」のグループID
   const title = "テストノート";
   const content = `
     <h1>テストノート</h1>
@@ -54,8 +58,6 @@ function testCreateGroupNote() {
 }
 
 function test_LWnotify(){
-  let env = getEnv();
-  setLWAPI(env);
 
   const userId_takaesu = "d6adfeb2-a185-4490-14af-057a829ebbdb";
   const message = "#####################\n" + "　テスト送信です"
