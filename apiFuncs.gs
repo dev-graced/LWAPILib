@@ -4,6 +4,29 @@
  *    バージョン: HEAD
  * 
  * 2. 以下のコードをApps Script のコード内にペーストします。
+ * 
+let env = LWAPI.getEnv();
+LWAPI.setLWAPI(env);
+
+function setLWAPI(env){
+// LINE WORKS API の情報を env にセットする関数
+
+  // LINE WORKS APIを実行するためのアクセストークンを取得して env に追加
+  let accessToken = PropertiesService.getScriptProperties().getProperty('accessToken');
+  let tokenIssueDate = PropertiesService.getScriptProperties().getProperty('tokenIssueDate');
+
+  LWAPI.setAccessTokenToEnv(accessToken,tokenIssueDate,env);
+  console.log("accessToken",env.accessToken);
+
+  // 訪問BotのBotId を env に追加
+  let botId = "1418596"; //訪問BotID
+  env.BOT_ID = botId;
+
+  //　アクセストークンの情報をスクリプトプロパティに記録する
+  PropertiesService.getScriptProperties().setProperty('accessToken',env.accessToken);
+  PropertiesService.getScriptProperties().setProperty('tokenIssueDate',env.tokenIssueDate);
+}
+ * 
 */
 
 // User Account認証用の設定
