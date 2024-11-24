@@ -64,9 +64,9 @@ function createGroupNote(groupId, title, content, accessToken) {
   const payload = {
     "title": title,
     "body": content,
-    "enableCollaboration": false,
+    "enableCollaboration": true,
     "isNotice": false,
-    "sendNotifications": false
+    "sendNotifications": true
   };
   
   // APIリクエストを実行
