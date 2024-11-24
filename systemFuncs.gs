@@ -1,5 +1,10 @@
 function createNippou() {
-  const title = "11/23(土)グレイス日報(訪問)"
+  const date = new Date();
+  const month = date.getMonth() + 1; // getMonth() returns 0-11
+  const day = date.getDate();
+  const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+  
+  const title = `${month}/${day}(${dayOfWeek})グレイス日報(訪問)`
   const content = `
     訪問患者数:30人
     新患:人
