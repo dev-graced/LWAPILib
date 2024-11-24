@@ -14,19 +14,11 @@
         "libraryId": "1PcEHcGVC1njZd8SfXtmgQk19djwVd2GrrW1gd7U5hNk033tzi6IUvIAV",
         "version": "2"
       }
-    ]
+    ],
+    "enabledAdvancedServices": []
   },
   "webapp": {
     "executeAs": "USER_DEPLOYING",
     "access": "ANYONE_ANONYMOUS"
-  },
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/script.scriptapp",
-    "https://www.googleapis.com/auth/userinfo.email"
-  ],
-  "urlFetchWhitelist": [
-    "https://auth.worksmobile.com/",
-    "https://www.worksapis.com/"
-  ]
+  }
 }
