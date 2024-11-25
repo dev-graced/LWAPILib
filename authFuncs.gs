@@ -227,3 +227,28 @@ function getUserAccessToken() {
   console.error("有効なトークンがありません。再度認証が必要です。");
   return null;
 }
+
+function doGet(e) {
+  /** LINE WORKS API のユーザー認証を行うAPI */
+
+  const redirectUri = "https://script.google.com/macros/s/AKfycbxnodkVBIyMqj1CCqxltV5OEhBRngIotdGLWIWuuEAsfJX86kwW7vdGHYnnFqXfT65j/exec";
+
+  /** 認可コードを受け取るためのコールバックハンドラ */
+  if (e.parameter.code) {
+    try{
+      /** 認可コードを使用してアクセストークンを取得 */
+      LWAPI.getAccessTokenFromCode(e.parameter.code,redirectUri);
+      return HtmlService.createHtmlOutput('認証に成功しました。このページを閉じてください。');
+
+    } catch (error){
+      return HtmlService.createHtmlOutput('認証に失敗しました。このページを閉じてください。');
+    }
+  }
+
+  /** 最初のアクセス時は認証ページにリダイレクト */
+  return HtmlService.createHtmlOutput(`
+    <script>
+      window.open("${LWAPI.getAuthUrl(redirectUri)}", '_blank')
+    </script>
+  `);
+}
