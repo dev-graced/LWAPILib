@@ -32,7 +32,7 @@ function setLWAPI(env){
 // User Account認証用の設定
 const USER_AUTH_CONFIG = {
   CLIENT_ID: "Ypeke8IZkJfaIERDLxA8",
-  // REDIRECT_URI: "https://script.google.com/macros/s/AKfycbzGqOAHKBaBe-HzYiryXC-Z2XlJSJK2PgsjUMvu_GrAMBt403xyd1JZ_TWiqSbpwuC5Ng/exec",
+  CLIENT_SECRET: "aSoSq5XDvk",
   AUTH_URL: "https://auth.worksmobile.com/oauth2/v2.0/authorize",
   TOKEN_URL: "https://auth.worksmobile.com/oauth2/v2.0/token",
   SCOPE: "group.note"
@@ -42,7 +42,6 @@ function getAuthUrl(redirectUri) {
   // 認証URLを生成
   const params = {
     client_id: USER_AUTH_CONFIG.CLIENT_ID,
-    // redirect_uri: USER_AUTH_CONFIG.REDIRECT_URI,
     redirect_uri: redirectUri,
     scope: USER_AUTH_CONFIG.SCOPE,
     response_type: 'code',
@@ -56,14 +55,14 @@ function getAuthUrl(redirectUri) {
   return `${USER_AUTH_CONFIG.AUTH_URL}?${queryString}`;
 }
 
-function getAccessTokenFromCode(code) {
-  // 認可コードを使用してアクセストークンを取得
+function getAccessTokenFromCode(code, redirectUri) {
+  // 認可コードを使用してアクセストークンとリフレッシュトークンを取得
   const payload = {
     grant_type: 'authorization_code',
     code: code,
     client_id: USER_AUTH_CONFIG.CLIENT_ID,
-    client_secret: "aSoSq5XDvk",
-    redirect_uri: USER_AUTH_CONFIG.REDIRECT_URI
+    client_secret: USER_AUTH_CONFIG.CLIENT_SECRET,
+    redirect_uri: redirectUri
   };
   
   const options = {
@@ -74,12 +73,80 @@ function getAccessTokenFromCode(code) {
   
   const response = UrlFetchApp.fetch(USER_AUTH_CONFIG.TOKEN_URL, options);
   const json = JSON.parse(response.getContentText());
+  
+  // スクリプトプロパティにユーザー認証用トークンを保存
+  PropertiesService.getScriptProperties().setProperty('userAccessToken', json.access_token);
+  PropertiesService.getScriptProperties().setProperty('userRefreshToken', json.refresh_token);
+  PropertiesService.getScriptProperties().setProperty('userTokenIssueDate', Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd'));
+  
   return json.access_token;
+}
+
+function refreshUserAccessToken(refreshToken) {
+  // リフレッシュトークンを使用して新しいアクセストークンを取得
+  const payload = {
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: USER_AUTH_CONFIG.CLIENT_ID,
+    client_secret: USER_AUTH_CONFIG.CLIENT_SECRET
+  };
+  
+  const options = {
+    method: 'post',
+    payload: payload,
+    muteHttpExceptions: true
+  };
+  
+  try {
+    const response = UrlFetchApp.fetch(USER_AUTH_CONFIG.TOKEN_URL, options);
+    const json = JSON.parse(response.getContentText());
+    
+    // 新しいユーザー認証用トークンを保存
+    PropertiesService.getScriptProperties().setProperty('userAccessToken', json.access_token);
+    if (json.refresh_token) {
+      PropertiesService.getScriptProperties().setProperty('userRefreshToken', json.refresh_token);
+    }
+    PropertiesService.getScriptProperties().setProperty('userTokenIssueDate', Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd'));
+    
+    return json.access_token;
+  } catch (error) {
+    console.error('リフレッシュトークンでの更新に失敗:', error);
+    return null;
+  }
+}
+
+function getUserAccessToken() {
+  // ユーザー認証用アクセストークンを取得する関数
+  let accessToken = PropertiesService.getScriptProperties().getProperty('userAccessToken');
+  let refreshToken = PropertiesService.getScriptProperties().getProperty('userRefreshToken');
+  let tokenIssueDate = PropertiesService.getScriptProperties().getProperty('userTokenIssueDate');
+  let todayFormatted = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd');
+
+  // トークンの有効性チェック
+  if (accessToken && tokenIssueDate === todayFormatted) {
+    console.log("ユーザー認証のアクセストークンは有効です");
+    return accessToken;
+  }
+
+  // リフレッシュトークンが存在する場合、それを使用してアクセストークンを更新
+  if (refreshToken) {
+    console.log("リフレッシュトークンを使用してアクセストークンを更新します");
+    const newAccessToken = refreshUserAccessToken(refreshToken);
+    if (newAccessToken) {
+      return newAccessToken;
+    }
+  }
+
+  console.error("有効なトークンがありません。再度認証が必要です。");
+  return null;
 }
 
 function createGroupNote(groupId, title, content, accessToken) {
   // LINE WORKS の既存のグループにグループノートを新規投稿する関数
   // const accessToken = getUserAccessToken();
+  // if (!accessToken) {
+  //   throw new Error("有効なアクセストークンがありません。再度認証を行ってください。");
+  // }
   
   const apiUriPart = "groups/" + groupId + "/note/posts";
   
@@ -98,8 +165,7 @@ function createGroupNote(groupId, title, content, accessToken) {
 
 function enableExternalBrowser(env){
   // LINE WORKS 内でリンクをタップした際、外部ブラウザで開くようにする設定
-
-  let apiUriPart = "security/external-browser/enable"; //API リクエスト URI　のbot以下の部分
+  let apiUriPart = "security/external-browser/enable";
 
   // APIリクエスト
   console.log("enable external browsing");
@@ -111,8 +177,7 @@ function enableExternalBrowser(env){
 
 function disableExternalBrowser(env){
   // LINE WORKS 内でリンクをタップした際、内部ブラウザで開くようにする設定
-
-  let apiUriPart = "security/external-browser/disable"; //API リクエスト URI　のbot以下の部分
+  let apiUriPart = "security/external-browser/disable";
 
   // APIリクエスト
   console.log("enable external browsing");
@@ -124,8 +189,7 @@ function disableExternalBrowser(env){
 
 function getExternalBrowserSetting(env){
   // LINE WORKS 内でリンクをタップした際のブラウザ設定を取得する関数
-
-  let apiUriPart = "security/external-browser"; //API リクエスト URI　のbot以下の部分
+  let apiUriPart = "security/external-browser";
 
   // APIリクエスト
   console.log("get external browser setting");
@@ -151,8 +215,7 @@ function getGroupInfo(env){
 }
 
 function getUserInfo(userId,env){
-// userId から LINEWORKS のユーザー情報を取得する関数
-
+  // userId から LINEWORKS のユーザー情報を取得する関数
   let lwUserUri = "https://www.worksapis.com/v1.0/users/"+userId;
   let headers = {"authorization": "Bearer " + env.accessToken };
   let options = {"headers": headers,"method": "get"};
@@ -161,7 +224,6 @@ function getUserInfo(userId,env){
 
 function requestApiGet(apiUriPart,accessToken){
   //LINE WORKS API をGETリクエストする関数
-
   let sendApiUri = "https://www.worksapis.com/v1.0/" + apiUriPart;
   let options = {   
     "headers": {"authorization": "Bearer "+ accessToken, "Content-Type" : "application/json"},
@@ -172,7 +234,6 @@ function requestApiGet(apiUriPart,accessToken){
 
 function requestApi(apiUriPart,payload,accessToken){
   //LINE WORKS API をPOSTリクエストする関数
-
   let sendApiUri = "https://www.worksapis.com/v1.0/" + apiUriPart;
   let options = {   
     "headers": {"authorization": "Bearer "+ accessToken, "Content-Type" : "application/json"},
@@ -243,13 +304,6 @@ function setTokenToEnv(today,sheetToken,scopes,env){
 function getAccessToken(ENV,scopes) {
 // LINEWORKS API のアクセストークンを発行する関数
   const uri = "https://auth.worksmobile.com/oauth2/v2.0/token";
-/*
-  console.log("JWT",getJwt(ENV));
-  console.log("client_id",ENV.CLIENT_ID);
-  console.log("client_secret",ENV.CLIENT_SECRET);
-  console.log("scope",scopes);
-  */
-
   const payload = {
     "assertion": getJwt(ENV),
     "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
@@ -263,14 +317,11 @@ function getAccessToken(ENV,scopes) {
     "headers": {"Content-Type" : "application/x-www-form-urlencoded"},
     "payload": payload
   };
-  console.log("response:", JSON.parse(UrlFetchApp.fetch(uri,options)));
   return JSON.parse(UrlFetchApp.fetch(uri,options));
 }
 
-// getAccessTokenとgetJwtはTokenを取得するためのファンクション
 function getJwt(ENV){
-// アクセストークンを発行するための情報をまとめてエンコードする関数
-
+  // アクセストークンを発行するための情報をまとめてエンコードする関数
   const header = Utilities.base64Encode(JSON.stringify({"alg":"RS256","typ":"JWT"}));
   const claimSet = JSON.stringify({
     "iss": ENV.CLIENT_ID,
@@ -284,7 +335,7 @@ function getJwt(ENV){
 }
 
 function getEnv() {
-// LINEWORKS API(東風会システム) の環境変数を設定する
+  // LINEWORKS API(東風会システム) の環境変数を設定する
   return {
     CLIENT_ID: "Ypeke8IZkJfaIERDLxA8",
     CLIENT_SECRET: "aSoSq5XDvk",
@@ -292,7 +343,6 @@ function getEnv() {
     PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCBW23QskXEcB7h\nF62wsN+E8U+1wDA20D4poRswANGtm6CbG/K50srrYeIt7mNj9Oc6LfEp4dGS6o8D\nni5AikM56yKbL/pGGDM6QyL3gWvoUJVGB4VFvh1dpKLz1k3/cNPpF5t202f9YNPN\nC0e2nl9mhaAW2MZCtHzCqGTZgXuxO/0mMJVeruWhydcAudP/RcFiCEGggDXb6wzS\n/bFQQikpONc0L16+mf555rRSW4vo/1P7TEtY93r7pRkh/vv3qogRgpl/eHD2yCyl\nD9QYA4n3Ly0G6nBXeRQGacYB3sBDlGK50c6ll8jieGkvRCvR3PDpXph4yXT4rDCh\nvfeBy093AgMBAAECggEAKwdmuA0U+ArzupxNwoCTWX2LrkGHyDPs+ZwFlyoulTk3\na2EYlIdxyGp++hhaJ13HrKqrlerv85bii6mKaR2UzydQE58Z+UcDg1Xhw8LhSh3E\nCc9mnZRn4EZrjgCzYUz+sIKRzCz2YmpbCdG+wRhdU5UPc4oYKQgwl++73D4eDw4T\nlpZqvf4hkcEK3GLv6f1jT10eTHjmtt79d2r3HXAWeR9io3PD3AxslzYX1oB7iXQr\nLm+J1E2JHoG7Nx/o5GCWxAsNvwJsGsP1zNoGBukCWeoAO7kZFnSbl+PphLkE3MYG\n6UsrOHntGPbRPY5dIYKqNWT9w0AoVR53y/2dhtEnQQKBgQDK5d815TvC/IhJeXgw\nlX95qMrUNdOrmnMFFAz04u9VSLbiszsxFcsjq7Q4B79TxuuhC7s8WGeFo3B2oMtS\n1iWiJacROEZPr/q6UF94bA0GxmzDJvRmRl/Jpj5vzF+/HWMMNf1pIev/dsD+OXIr\n9WMzQJuaSBr304OWOf81Eff0ewKBgQCjNlYN+Ow8SznjnLOjEtAtFNTM2JlWfqdr\n6O2/PZve8sITSMsh6yE8p0XBYYdu+Wb5RR5ZRH3zgxrfpx5tzSOg0T/wQD3uNBtS\nARR4OFP5Dps2m420NNMu/B+ryQ3IPpWgvUyv4D2GH0sSydvVBhh20vPOprNtBML9\nrRtfFb92NQKBgQC5npsZ/2Ew/T7hmRLvv5Ujg9wrUCMZtu7LEpDX6FT0PNWziCz6\ntulk9MynBc9voWgnqUfd6TKr+94DaQ8Z9XfwY2n4QvdwJ5rFoIn27ULtk9Ikpxqo\nBnHTVReByANAIG5g2XPAHpx81fOxoHRm6tOaK90uxBCH8SVM5jooHwwsyQKBgQCG\nGD2Jy0ukmhXc2UGKKQnbEDNqfkc1lmfNtBmpt1+aRI+JspQasQmkwLYCFTRlzAl7\nofs2Upy89qmcuby5cALmvSUwKkf3rt4HeRWtVHJBvWtu6Uz6kzAzeTg4Nr7ZF/pt\njzozgiRqTsmqjSjNk+2Dqvxfe/0NBA2EyLYlYEPnRQKBgQC49NmBAhcJCXg3xfA8\n9QIm0PXJ2Y+5C/t1XQ5jMCwaXtW09n1KMXrBjWqEgACkitq5SscrX3Mt56l6Sp6E\nc3RG8MjiUtFtxezZdnMEuXpe1QtwXfS18c23GM/ZLQQ11q/RrrMsVKhWIq2ak3/q\nXudCjjshwn3erPvOrCz9PX2nWw==\n-----END PRIVATE KEY-----",
     DOMAIN_ID: 500040856,
     ADMIN_ID: "takaesu@tofukai",
-    scopes: "bot,user.read,directory.read,orgunit.read,group.note,group.read",
-    tokenSheetId: "1PQQ1OLzNnqc5z_JnY0YlRqs4WS-DDXbV-cHXntBDxY0"
+    scopes: "bot,user.read,directory.read,orgunit.read,group.note,group.read"
   }
-}  
+}

@@ -44,8 +44,11 @@ function testCreateGroupNote() {
   `;
   
   try {
+    /** ユーザーアクセストークンの取得 */
+    const accessToken = getUserAccessToken();
+
     // グループノートを作成
-    const result = createGroupNote(groupId, title, content);
+    const result = createGroupNote(groupId, title, content, accessToken);
     
     // 結果をログに出力
     console.log("グループノート作成成功:", result);
