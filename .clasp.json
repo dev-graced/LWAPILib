@@ -1,5 +1,5 @@
 {
     "scriptId": "1SEhvSN3z7vd8q0hOkjw95IMUNlQnxbjYL5NeuFmbloLzFqRy7-0bPHIw",
     "rootDir": "./",
-    "filePushOrder": ["apiFuncs.gs", "botFuncs.gs","systemFuncs.gs","test.gs"]
+    "filePushOrder": ["authFuncs.gs","apiFuncs.gs", "botFuncs.gs","systemFuncs.gs","test.gs"]
 }

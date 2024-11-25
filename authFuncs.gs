@@ -234,13 +234,14 @@ function getUserAccessToken() {
 function doGet(e) {
   /** LINE WORKS API のユーザー認証を行うAPI */
 
-  const redirectUri = "https://script.google.com/macros/s/AKfycbxnodkVBIyMqj1CCqxltV5OEhBRngIotdGLWIWuuEAsfJX86kwW7vdGHYnnFqXfT65j/exec";
+  const redirectUri = "https://script.google.com/macros/s/AKfycbzGqOAHKBaBe-HzYiryXC-Z2XlJSJK2PgsjUMvu_GrAMBt403xyd1JZ_TWiqSbpwuC5Ng/exec";
+  // const redirectUri = ScriptApp.getService().getUrl(); //テスト用 webアプリURL
 
   /** 認可コードを受け取るためのコールバックハンドラ */
   if (e.parameter.code) {
     try{
       /** 認可コードを使用してアクセストークンを取得 */
-      LWAPI.getAccessTokenFromCode(e.parameter.code,redirectUri);
+      getAccessTokenFromCode(e.parameter.code,redirectUri);
       return HtmlService.createHtmlOutput('認証に成功しました。このページを閉じてください。');
 
     } catch (error){
@@ -251,7 +252,7 @@ function doGet(e) {
   /** 最初のアクセス時は認証ページにリダイレクト */
   return HtmlService.createHtmlOutput(`
     <script>
-      window.open("${LWAPI.getAuthUrl(redirectUri)}", '_blank')
+      window.open("${getAuthUrl(redirectUri)}", '_blank')
     </script>
   `);
 }
