@@ -51,14 +51,17 @@ function postGroupNote(groupId, title, content, accessToken) {
   return requestApi(apiUriPart, payload, accessToken);
 }
 
-function patchGroupNote(groupId, postId, title, content, accessToken) {
+function patchGroupNote(groupId, postName, content) {
   // LINE WORKS の既存のグループにグループノートを部分更新する関数
   
+  const userAccessToken = getUserAccessToken();
+
+  const postId = getGroupNotePostId(groupId,postName,userAccessToken);
   const apiUriPart = "groups/" + groupId + "/note/posts/" + postId;
   
   // APIリクエストのペイロードを作成
   const payload = {
-    "title": title,
+    "title": postName,
     "body": content,
     "enableCollaboration": true,
     "isNotice": false,
@@ -66,7 +69,8 @@ function patchGroupNote(groupId, postId, title, content, accessToken) {
   };
   
   // APIリクエストを実行
-  return requestApiPatch(apiUriPart, payload, accessToken);
+  return requestApiPatch(apiUriPart, payload, userAccessToken);
+  // return requestApiGet(apiUriPart, userAccessToken)
 }
 
 function getGroupNotePostId(groupId, postName, accessToken) {

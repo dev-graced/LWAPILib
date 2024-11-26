@@ -28,7 +28,7 @@ function setLWAPI(env){
  *  テスト関数
  */
 
-function testCreateGroupNote() {
+function test_postGroupNote() {
   // テスト用のパラメータ
   const groupId = "7e1c3a3e-9a16-417d-3f25-05dade92ac87"; // 「よろず相談所（テスト用）」のグループID
   const title = "テストノート";
@@ -48,7 +48,7 @@ function testCreateGroupNote() {
     const accessToken = getUserAccessToken();
 
     // グループノートを作成
-    const result = createGroupNote(groupId, title, content, accessToken);
+    const result = postGroupNote(groupId, title, content, accessToken);
     
     // 結果をログに出力
     console.log("グループノート作成成功:", result);
@@ -105,4 +105,29 @@ function test_getGroupNotePostId(){
   accessToken = getUserAccessToken();
 
   getGroupNotePostId(groupId,postName,accessToken);
+}
+
+function test_patchGroupNote(){
+  const groupId = "7e1c3a3e-9a16-417d-3f25-05dade92ac87"; // 「よろず相談所（テスト用）」のグループID
+  const postName = "11/26(火)グレイス日報(訪問)";
+
+  const content = `
+    訪問患者数: 100人
+    新患: 人
+    急患: 人
+    キャンセル: 人
+
+    訪問ポイント人数: 100P
+    日室: P
+    本間: P
+
+    訪問ブラッシング数: 100人 
+    日室: 人
+    本間: 人
+
+    休み: なし
+  `;
+
+  const result = patchGroupNote(groupId,postName,content);
+  console.log(result.getContentText());
 }
