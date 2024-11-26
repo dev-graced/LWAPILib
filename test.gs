@@ -44,19 +44,18 @@ function test_postGroupNote() {
   `;
   
   try {
-    /** ユーザーアクセストークンの取得 */
-    const accessToken = getUserAccessToken();
 
     // グループノートを作成
-    const result = postGroupNote(groupId, title, content, accessToken);
+    const result = postGroupNote(groupId, title, content);
     
     // 結果をログに出力
     console.log("グループノート作成成功:", result);
-    
     return "テスト成功: グループノートが作成されました";
+
   } catch (error) {
     console.error("グループノート作成エラー:", error);
     throw new Error("テスト失敗: " + error.message);
+
   }
 }
 

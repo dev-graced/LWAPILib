@@ -29,12 +29,13 @@ function setLWAPI(env){
  * 
 */
 
-function postGroupNote(groupId, title, content, accessToken) {
+function postGroupNote(groupId, title, content) {
   // LINE WORKS の既存のグループにグループノートを新規投稿する関数
-  // const accessToken = getUserAccessToken();
-  // if (!accessToken) {
-  //   throw new Error("有効なアクセストークンがありません。再度認証を行ってください。");
-  // }
+
+  const accessToken = getUserAccessToken();
+  if (!accessToken) {
+    throw new Error("有効なアクセストークンがありません。再度認証を行ってください。");
+  };
   
   const apiUriPart = "groups/" + groupId + "/note/posts";
   
@@ -55,6 +56,9 @@ function patchGroupNote(groupId, postName, content) {
   // LINE WORKS の既存のグループにグループノートを部分更新する関数
   
   const userAccessToken = getUserAccessToken();
+  if (!userAccessToken) {
+    throw new Error("有効なアクセストークンがありません。再度認証を行ってください。");
+  };
 
   const postId = getGroupNotePostId(groupId,postName,userAccessToken);
   const apiUriPart = "groups/" + groupId + "/note/posts/" + postId;
@@ -73,17 +77,21 @@ function patchGroupNote(groupId, postName, content) {
   // return requestApiGet(apiUriPart, userAccessToken)
 }
 
-function getGroupNotePostId(groupId, postName, accessToken) {
+function getGroupNotePostId(groupId, postName) {
   /** 指定されたタイトルを持つグループノートのpostIdを取得する関数
    * groupId: グループのID
    * postName: 検索したいノートのタイトル
-   * accessToken: LINE WORKS APIのアクセストークン
    */
+
+  const userAccessToken = getUserAccessToken();
+  if (!userAccessToken) {
+    throw new Error("有効なアクセストークンがありません。再度認証を行ってください。");
+  };
 
   const apiUriPart = "groups/" + groupId + "/note/posts";
   
   // グループノートの一覧を取得
-  const response = requestApiGet(apiUriPart, accessToken);
+  const response = requestApiGet(apiUriPart, userAccessToken);
   const noteList = JSON.parse(response.getContentText().replace(/(\d{15,})/g, '"$1"'));
   console.log("ノートリスト",noteList);
   
