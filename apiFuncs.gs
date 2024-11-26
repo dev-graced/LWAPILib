@@ -31,7 +31,7 @@ function setLWAPI(env){
 
 
 
-function createGroupNote(groupId, title, content, accessToken) {
+function postGroupNote(groupId, title, content, accessToken) {
   // LINE WORKS の既存のグループにグループノートを新規投稿する関数
   // const accessToken = getUserAccessToken();
   // if (!accessToken) {
