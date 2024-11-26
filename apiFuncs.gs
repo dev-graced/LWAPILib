@@ -53,6 +53,49 @@ function postGroupNote(groupId, title, content, accessToken) {
   return requestApi(apiUriPart, payload, accessToken);
 }
 
+function patchGroupNote(groupId, postId, title, content, accessToken) {
+  // LINE WORKS の既存のグループにグループノートを部分更新する関数
+  
+  const apiUriPart = "groups/" + groupId + "/note/posts/" + postId;
+  
+  // APIリクエストのペイロードを作成
+  const payload = {
+    "title": title,
+    "body": content,
+    "enableCollaboration": true,
+    "isNotice": false,
+    "sendNotifications": true
+  };
+  
+  // APIリクエストを実行
+  return requestApiPatch(apiUriPart, payload, accessToken);
+}
+
+function getGroupNotePostId(groupId, postName, accessToken) {
+  /** 指定されたタイトルを持つグループノートのpostIdを取得する関数
+   * groupId: グループのID
+   * postName: 検索したいノートのタイトル
+   * accessToken: LINE WORKS APIのアクセストークン
+   */
+
+
+  const apiUriPart = "groups/" + groupId + "/note/posts";
+  
+  // グループノートの一覧を取得
+  const response = requestApiGet(apiUriPart, accessToken);
+  const noteList = JSON.parse(response.getContentText());
+  
+  // 指定されたタイトルを持つノートを検索
+  for (let note of noteList.posts) {
+    if (note.title === postName) {
+      return note.postId;
+    }
+  }
+  
+  // 見つからなかった場合はnullを返す
+  return null;
+}
+
 function enableExternalBrowser(env){
   // LINE WORKS 内でリンクをタップした際、外部ブラウザで開くようにする設定
   let apiUriPart = "security/external-browser/enable";
@@ -128,6 +171,18 @@ function requestApi(apiUriPart,payload,accessToken){
   let options = {   
     "headers": {"authorization": "Bearer "+ accessToken, "Content-Type" : "application/json"},
     "method": "post",
+    "payload": JSON.stringify(payload)
+  };
+  console.log("payload for API request",payload);
+  return UrlFetchApp.fetch(sendApiUri,options);
+}
+
+function requestApiPatch(apiUriPart,payload,accessToken){
+  //LINE WORKS API をPOSTリクエストする関数
+  let sendApiUri = "https://www.worksapis.com/v1.0/" + apiUriPart;
+  let options = {   
+    "headers": {"authorization": "Bearer "+ accessToken, "Content-Type" : "application/json"},
+    "method": "patch",
     "payload": JSON.stringify(payload)
   };
   console.log("payload for API request",payload);

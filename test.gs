@@ -98,3 +98,11 @@ function test_getAtuthUrl(){
   const authUrl = getAuthUrl();
   console.log("authUrl",authUrl);
 }
+
+function test_getGroupNotePostId(){
+  const groupId = "7e1c3a3e-9a16-417d-3f25-05dade92ac87"; // 「よろず相談所（テスト用）」のグループID
+  const postName = "11/26(火)グレイス日報(訪問)";
+  accessToken = getUserAccessToken();
+
+  getGroupNotePostId(groupId,postName,accessToken);
+}
