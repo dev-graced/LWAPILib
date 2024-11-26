@@ -29,8 +29,6 @@ function setLWAPI(env){
  * 
 */
 
-
-
 function postGroupNote(groupId, title, content, accessToken) {
   // LINE WORKS の既存のグループにグループノートを新規投稿する関数
   // const accessToken = getUserAccessToken();
@@ -78,12 +76,12 @@ function getGroupNotePostId(groupId, postName, accessToken) {
    * accessToken: LINE WORKS APIのアクセストークン
    */
 
-
   const apiUriPart = "groups/" + groupId + "/note/posts";
   
   // グループノートの一覧を取得
   const response = requestApiGet(apiUriPart, accessToken);
-  const noteList = JSON.parse(response.getContentText());
+  const noteList = JSON.parse(response.getContentText().replace(/(\d{15,})/g, '"$1"'));
+  console.log("ノートリスト",noteList);
   
   // 指定されたタイトルを持つノートを検索
   for (let note of noteList.posts) {
