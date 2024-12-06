@@ -69,7 +69,7 @@ function patchGroupNote(groupId, postName, content) {
     "body": content,
     "enableCollaboration": true,
     "isNotice": false,
-    "sendNotifications": true
+    "sendNotifications": false
   };
   
   // APIリクエストを実行
