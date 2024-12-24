@@ -130,3 +130,40 @@ function test_patchGroupNote(){
   const result = patchGroupNote(groupId,postName,content);
   console.log(result.getContentText());
 }
+
+function test_uploadDriveFileToLineWorks(){
+  const driveFileId = "1_SOdhskkkDfDe6z8jOsxs9d4vJfv31Mp"; //訪問部/ヘルシーちゃん体操/顎の体操.png
+  const fileId = uploadDriveFileToLineWorks(driveFileId, env);
+  console.log(fileId);
+}
+
+function test_getUploadUrl() {
+  // テスト用のファイル名
+  const fileName = "test_file.txt";
+
+  try {
+    // アップロードURL取得をテスト
+    const result = getUploadUrl(fileName, env);
+    
+    // 必要なプロパティが存在するか確認
+    if (!result.uploadUrl) {
+      throw new Error("uploadUrlが取得できませんでした");
+    }
+
+    // 結果をログに出力
+    console.log("アップロードURL取得成功:", {
+      uploadUrl: result.uploadUrl,
+    });
+
+    // URLの形式を確認
+    if (!result.uploadUrl.startsWith("https://")) {
+      throw new Error("不正なuploadUrl形式です: " + result.uploadUrl);
+    }
+
+    return "テスト成功: アップロードURLが正しく取得できました";
+
+  } catch (error) {
+    console.error("アップロードURL取得エラー:", error);
+    throw new Error("テスト失敗: " + error.message);
+  }
+}
