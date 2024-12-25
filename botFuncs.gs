@@ -343,36 +343,35 @@ function getUploadUrl(fileName, env) {
 }
 
 function uploadDriveFileToLineWorks(fileId, env) {
-  // Google DriveのファイルをLINE WORKSにアップロードする関数
-  // fileId: Google DriveのファイルID
-  // env: 環境変数オブジェクト（accessTokenとBOT_IDを含む）
-  // 戻り値: アップロードされたファイルのLINE WORKS上でのファイルID
-
   try {
     // Google Driveからファイルを取得
     const file = DriveApp.getFileById(fileId);
     const fileName = file.getName();
     const fileBlob = file.getBlob();
-    const fileSize = fileBlob.getBytes().length;
 
     // アップロードURLを取得
     const uploadInfo = getUploadUrl(fileName, env);
-    
-    // ファイルをアップロード
+
+    // multipart/form-data のペイロードを構築
+    const payload = {
+      resourceName: fileName,
+      fileData: fileBlob
+    };
+
+    // HTTP リクエストオプションを設定
     const options = {
-      method: "put",
+      method: "post",
       headers: {
-        "Content-Type": file.getMimeType(),
-        "Content-Length": String(fileSize)
+        "Authorization": `Bearer ${env.accessToken}`
       },
-      payload: fileBlob.getBytes(),
-      muteHttpExceptions: true
+      payload: payload,
+      muteHttpExceptions: true,
     };
 
     // アップロードURLにファイルを送信
     const response = UrlFetchApp.fetch(uploadInfo.uploadUrl, options);
     const responseCode = response.getResponseCode();
-    
+
     if (responseCode !== 200) {
       console.error("Upload Response:", response.getContentText());
       throw new Error(
@@ -380,8 +379,11 @@ function uploadDriveFileToLineWorks(fileId, env) {
       );
     }
 
-    // 成功した場合、レスポンスからfileIdを取得して返す
+    // 成功した場合、レスポンスから fileId を取得して返す
     const responseJson = JSON.parse(response.getContentText());
+    console.log("fileId",responseJson.fileId);
+    console.log("fileName",responseJson.fileName);
+    console.log("fileSize",responseJson.fileSize);
     return responseJson.fileId;
 
   } catch (error) {

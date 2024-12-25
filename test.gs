@@ -132,6 +132,8 @@ function test_patchGroupNote(){
 }
 
 function test_uploadDriveFileToLineWorks(){
+  const fileName = "test_file.txt";
+  const result = getUploadUrl(fileName, env);
   const driveFileId = "1_SOdhskkkDfDe6z8jOsxs9d4vJfv31Mp"; //訪問部/ヘルシーちゃん体操/顎の体操.png
   const fileId = uploadDriveFileToLineWorks(driveFileId, env);
   console.log(fileId);
