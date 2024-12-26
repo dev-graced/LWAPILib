@@ -53,9 +53,22 @@ function sendImgCaroucelMsg(imageNum, imageId, senderId, receiverId, env) {
         ],
       },
     };
-  } else if (imageNum > 4) {
+  } else if (imageNum === 5) {
+    payload = {
+      content: {
+        type: "image_carousel",
+        columns: [
+          { fileId: imageId[0] },
+          { fileId: imageId[1] },
+          { fileId: imageId[2] },
+          { fileId: imageId[3] },
+          { fileId: imageId[4] },
+        ],
+      },
+    };
+  } else if (imageNum > 5) {
     sendTextMsg(
-      "一度に送信できる画像は４枚までです。4枚目まで送信します。",
+      "一度に送信できる画像は５枚までです。５枚目まで送信します。",
       senderId,
       env
     );
@@ -67,6 +80,7 @@ function sendImgCaroucelMsg(imageNum, imageId, senderId, receiverId, env) {
           { fileId: imageId[1] },
           { fileId: imageId[2] },
           { fileId: imageId[3] },
+          { fileId: imageId[4] },
         ],
       },
     };
